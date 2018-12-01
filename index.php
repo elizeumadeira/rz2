@@ -43,6 +43,7 @@ foreach ($arquivos as $arquivo) {
     //começa o verdadeiro processamento
     $fh = fopen($dir_in . '/' . $arquivo, 'r');
     while ($linha = fgets($fh)) {
+        $total_venda = 0;
         $linha = onlyAsciiChars($linha);
         
         preg_match_all("/[^[\]]+/", $linha, $matches);
@@ -75,23 +76,26 @@ foreach ($arquivos as $arquivo) {
                 $venda_id = trim($venda_info[0]);
                 $item_qtd = trim($venda_info[1]);
                 $item_preco = (float) trim(str_replace(' ', '', $venda_info[2]));
-                $total_venda = $item_qtd * $item_preco;
+                $total_venda += $item_qtd * $item_preco;
 
-                if ($total_venda > $venda_mais_cara) {
-                    $venda_mais_cara = $total_venda;
-                    $id_venda_mais_cara = $venda_id;
-                }
+                
 
                 // //soma as vendas por vendedores
                 // if (!isset($venda_por_vendedor[$id])) {
                 //     $venda_por_vendedor[$id] = 0;
                 // }
                 // $venda_por_vendedor[$id] += $total_venda;
-                
-                if ($pior_venda == 0 || $total_venda < $pior_venda) {
-                    $pior_venda = $total_venda;
-                    $id_pior_vendedor = $id;
-                }
+            }
+
+            d($id, $total_venda);
+            if ($total_venda > $venda_mais_cara) {
+                $venda_mais_cara = $total_venda;
+                $id_venda_mais_cara = $venda_id;
+            }
+            
+            if ($pior_venda == 0 || $total_venda < $pior_venda) {
+                $pior_venda = $total_venda;
+                $id_pior_vendedor = $nome;
             }
         } elseif ($tipo == 1) {//vendedores
             // $nome = $p1[2];
@@ -109,11 +113,11 @@ foreach ($arquivos as $arquivo) {
         }
     }
 }
-$media_salarial = round($folha_pagamento / $qtd_vendedor,2);
+$media_salarial = round($folha_pagamento / $qtd_vendedor, 2);
 //exporta o arquivo
 echo 'Venda mais cara ($ / Id): R$ ' . $venda_mais_cara . ' / ' . $id_venda_mais_cara . '<br />';
 echo 'Média Salarial: ' . $media_salarial . '<br />';
-echo 'Pior venda: ' . $id_pior_vendedor . '<br />';
+echo 'Pior vendedor: ' . $id_pior_vendedor . '<br />';
 echo 'Qtd. de vendedores: ' . $qtd_vendedor . '<br />';
 echo 'Qtd. de clientes: ' . $qtd_clientes . '<br />';
 
